@@ -1,21 +1,43 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
   const [name,setName] = useState('');
   const [description,setDescription] = useState('');
   const [datetime,setDateTime]=useState('');
-  const addNewTransaction=(e)=>{
+  const [transactions,setTransactions]=useState([]);
+  useEffect(()=>{
+    getTransactions().then(transaction=>{
+      // console.log(transaction);
+      setTransactions(transaction);
+    })
+  },[]);
+  const getTransactions=async()=>{
+    const url= process.env.REACT_APP_API_URL+'/transactions';
+    const response = await fetch(url);
+    return await response.json();
+  }
+  const addNewTransaction=async (e)=>{
     e.preventDefault();
-    const url = process.env.REACT_APP_API_URL+'/transaction';
-    fetch(url,{
+    const price = name.split(' ')[0];
+    const url = process.env.REACT_APP_API_URL +'/transaction';
+    // console.log(name,price,description,datetime);
+    await fetch(url,{
       method:'POST',
       headers:{'Content-type':'application/json'},
-      body:JSON.stringify({name,description,datetime})
+      body:JSON.stringify({
+        name:name.substring(price.length+1),
+        price,
+        description,
+        datetime
+      })
     }).then(response=>
       response.json().then(res=>{
         console.log("res ",res)})
-    )
+    );
+    setName('');
+    setDateTime('');
+    setDescription('');
   }
   return (
     <main>
@@ -30,48 +52,23 @@ function App() {
         </div>
         <button>Add New Transaction</button>
       </form>
-      <div className="transactions">
-        <div className='transaction'>
-          <div className='left'>
-            <div className="name">L.G. TV</div>
-            <div className="description">I need a new TV.</div>
-          </div>
-          <div className='right'>
-            <div className="price red">-$300</div>
-            <div className="datetime">2-1-24 3:17</div>
-          </div>
-        </div>
-        <div className='transaction'>
-          <div className='left'>
-            <div className="name">L.G. TV</div>
-            <div className="description">I need a new TV.</div>
-          </div>
-          <div className='right'>
-            <div className="price green">+$300</div>
-            <div className="datetime">2-1-24 3:17</div>
-          </div>
-        </div>
-        <div className='transaction'>
-          <div className='left'>
-            <div className="name">L.G. TV</div>
-            <div className="description">I need a new TV.</div>
-          </div>
-          <div className='right'>
-            <div className="price green">+$300</div>
-            <div className="datetime">2-1-24 3:17</div>
-          </div>
-        </div>
-        <div className='transaction'>
-          <div className='left'>
-            <div className="name">L.G. TV</div>
-            <div className="description">I need a new TV.</div>
-          </div>
-          <div className='right'>
-            <div className="price red">-$300</div>
-            <div className="datetime">2-1-24 3:17</div>
-          </div>
-        </div>
-      </div>
+      {
+        transactions?.map(tran=>{
+          return (
+          <div className="transactions" key={tran._id}>
+            <div className='transaction'>
+              <div className='left'>
+                <div className="name">{tran.name}</div>
+                <div className="description">{tran.description}</div>
+              </div>
+              <div className='right'>
+                <div className={`price ${tran.price>0?"green":"red"}`}>{tran.price>0?'+':'-'}${Math.abs(tran.price)}</div>
+                <div className="datetime">{tran.datetime}</div>
+              </div>
+            </div>
+          </div>);
+        })
+      }
     </main>
   );
 }
