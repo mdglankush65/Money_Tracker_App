@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/mdglankush65/Money_Tracker_App/static/css/main.93238588.css",
+    "main.js": "/mdglankush65/Money_Tracker_App/static/js/main.d2410996.js",
+    "static/js/787.91830cf8.chunk.js": "/mdglankush65/Money_Tracker_App/static/js/787.91830cf8.chunk.js",
+    "index.html": "/mdglankush65/Money_Tracker_App/index.html",
+    "main.93238588.css.map": "/mdglankush65/Money_Tracker_App/static/css/main.93238588.css.map",
+    "main.d2410996.js.map": "/mdglankush65/Money_Tracker_App/static/js/main.d2410996.js.map",
+    "787.91830cf8.chunk.js.map": "/mdglankush65/Money_Tracker_App/static/js/787.91830cf8.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.93238588.css",
+    "static/js/main.d2410996.js"
+  ]
+}
