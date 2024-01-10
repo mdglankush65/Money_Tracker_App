@@ -4,24 +4,21 @@ import { useState, useEffect } from 'react';
 function App() {
   const [name,setName] = useState('');
   const [description,setDescription] = useState('');
-  const [datetime,setDateTime]=useState('');
+  const [datetime, setDateTime] = useState(new Date().toISOString().slice(0, 16));
   const [transactions,setTransactions]=useState([]);
-  useEffect(()=>{
-    getTransactions().then(transaction=>{
-      // console.log(transaction);
-      setTransactions(transaction);
-    })
-  },[]);
+  const [total,setTotal]=useState(0);
   const getTransactions=async()=>{
     const url= process.env.REACT_APP_API_URL+'/transactions';
     const response = await fetch(url);
-    return await response.json();
+    const res= await response.json();
+    setTotal(res.reduce((acc, obj) => acc += parseFloat(obj.price),0));
+    return res;
   }
   const addNewTransaction=async (e)=>{
     e.preventDefault();
-    const price = name.split(' ')[0];
+    let price = name.split(' ')[0];
+    if(isNaN(parseFloat(price))) price=0;
     const url = process.env.REACT_APP_API_URL +'/transaction';
-    // console.log(name,price,description,datetime);
     await fetch(url,{
       method:'POST',
       headers:{'Content-type':'application/json'},
@@ -38,13 +35,24 @@ function App() {
     setName('');
     setDateTime('');
     setDescription('');
+    getTransactions().then(transaction => {
+      setTransactions(transaction);
+    });
   }
+  useEffect(() => {
+    getTransactions().then(transaction => {
+      setTransactions(transaction);
+    })
+  }, []);
   return (
     <main>
-      <h1>$400.00</h1>
-      <form onSubmit={addNewTransaction}>
+      <h1>${total}</h1>
+      <form onSubmit={() =>{
+        if (name !== '' && description !== '' && datetime !== '') 
+          addNewTransaction();
+        }}>
         <div className='basic'>
-          <input type="text" value={name} onChange={ev=>setName(ev.target.value)} placeholder={'L.G. 64" TV'} />
+          <input type="text" value={name} onChange={ev=>setName(ev.target.value)} placeholder={'+1000 L.G. 64" TV'} />
           <input type="datetime-local" value={datetime} onChange={ev=>setDateTime(ev.target.value)} />
         </div>
         <div className="description">
@@ -53,17 +61,17 @@ function App() {
         <button>Add New Transaction</button>
       </form>
       {
-        transactions?.map(tran=>{
+        transactions?.map(transaction=>{
           return (
-          <div className="transactions" key={tran._id}>
+          <div className="transactions" key={transaction._id}>
             <div className='transaction'>
               <div className='left'>
-                <div className="name">{tran.name}</div>
-                <div className="description">{tran.description}</div>
+                  <div className="name">{transaction.name}</div>
+                  <div className="description">{transaction.description}</div>
               </div>
               <div className='right'>
-                <div className={`price ${tran.price>0?"green":"red"}`}>{tran.price>0?'+':'-'}${Math.abs(tran.price)}</div>
-                <div className="datetime">{tran.datetime}</div>
+                  <div className={`price ${transaction.price >= 0 ? "green" : "red"}`}>{transaction.price > 0 ? '+' : '-'}${Math.abs(transaction.price)}</div>
+                  <div className="datetime">{transaction.datetime}</div>
               </div>
             </div>
           </div>);
